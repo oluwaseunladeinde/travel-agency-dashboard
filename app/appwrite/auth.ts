@@ -21,10 +21,17 @@ export const storeUserData = async () => {
         const user = await account.get();
         if (!user) throw new Error("User not found");
 
-        const { providerAccessToken } = (await account.getSession("current")) || {};
-        const profilePicture = providerAccessToken
-            ? await getGooglePicture(providerAccessToken)
-            : null;
+        const session = await account.getSession("current") || {};
+        const { providerAccessToken, provider } = session;
+
+        let profilePicture = null;
+        if (providerAccessToken) {
+            if (provider === 'github') {
+                profilePicture = await getGithubPicture(providerAccessToken);
+            } else if (provider === 'google') {
+                profilePicture = await getGooglePicture(providerAccessToken);
+            }
+        }
 
         const createdUser = await database.createDocument(
             appwriteConfig.databaseId,
@@ -61,6 +68,27 @@ const getGooglePicture = async (accessToken: string) => {
     }
 };
 
+const getGithubPicture = async (accessToken: string) => {
+    try {
+        const response = await fetch(
+            "https://api.github.com/user",
+            { 
+                headers: { 
+                    Authorization: `Bearer ${accessToken}`,
+                    Accept: 'application/vnd.github.v3+json'
+                } 
+            }
+        );
+        if (!response.ok) throw new Error("Failed to fetch GitHub profile picture");
+
+        const data = await response.json();
+        return data.avatar_url || null;
+    } catch (error) {
+        console.error("Error fetching GitHub picture:", error);
+        return null;
+    }
+}
+
 export const loginWithGoogle = async () => {
     try {
         account.createOAuth2Session(
@@ -72,6 +100,18 @@ export const loginWithGoogle = async () => {
         console.error("Error during OAuth2 session creation:", error);
     }
 };
+
+export const loginWithGitHub = async () => {
+    try {
+        account.createOAuth2Session(
+            OAuthProvider.Github,
+            `${window.location.origin}/`,
+            `${window.location.origin}/404`
+        );
+    } catch (error) {
+        console.error("Error during GitHub OAuth2 session creation:", error);
+    }
+}
 
 export const logoutUser = async () => {
     try {
