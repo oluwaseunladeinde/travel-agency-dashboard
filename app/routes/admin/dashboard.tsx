@@ -17,7 +17,6 @@ export async function clientLoader() {
 }
 
 const Dashboard = ({ loaderData }: Route.ComponentProps) => {
-
     const user = loaderData.user as User | null;
 
     const {totalUsers, userRole, usersJoined, totalTrips, tripsCreated} = dashboardStats;
