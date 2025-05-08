@@ -1,6 +1,6 @@
 import {Link, useLocation} from "react-router";
 import {ChipDirective, ChipListComponent, ChipsDirective} from "@syncfusion/ej2-react-buttons";
-import {cn, getFirstWord} from "~/lib/utils";
+import {cn, formatNumber, getFirstWord} from "~/lib/utils";
 
 const TripCard = ({ id, name, location, imageUrl, tags, price }: TripCardProps) => {
     const path = useLocation();
@@ -36,7 +36,7 @@ const TripCard = ({ id, name, location, imageUrl, tags, price }: TripCardProps) 
                 </ChipListComponent>
             </div>
 
-            <article className="tripCard-pill">{price}</article>
+            <article className="tripCard-pill">{formatNumber(price)}</article>
         </Link>
     )
 }
