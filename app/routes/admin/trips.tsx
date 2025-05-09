@@ -27,6 +27,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 const Trips = ({ loaderData }: Route.ComponentProps) => {
 
     const trips = loaderData.trips as Trip[] | [];
+    console.log({trips});
 
     const [searchParams] = useSearchParams();
     const initialPage = Number(searchParams.get('page') || '1')
@@ -37,8 +38,6 @@ const Trips = ({ loaderData }: Route.ComponentProps) => {
         setCurrentPage(page);
         window.location.search = `?page=${page}`
     }
-
-
 
     return (
         <main className="all-users wrapper">

@@ -1,18 +1,38 @@
 import type { Route } from './+types/dashboard';
 import {Header, TripCard, StatsCard} from "../../../components";
-import {allTrips, dashboardStats, user} from "~/constants";
+import {dashboardStats, user} from "~/constants";
 
-import {getUser} from "~/appwrite/auth";
+import {getAllUsers, getUser} from "~/appwrite/auth";
+import {getAllTrips} from "~/appwrite/trips";
+import {parseTripData} from "~/lib/utils";
 
 export async function clientLoader() {
     const [
         user,
+        trips,
+        allUsers,
     ] = await Promise.all([
         await getUser(),
-    ])
+        await getAllTrips(4, 0),
+        await getAllUsers(4, 0),
+    ]);
+
+    const allTrips = trips.allTrips.map(({ $id, tripDetails, imageUrls }) => ({
+        id: $id,
+        ...parseTripData(tripDetails),
+        imageUrls: imageUrls ?? []
+    }));
+
+    const mappedUsers: UsersItineraryCount[] = allUsers.users.map((user) => ({
+        imageUrl: user.imageUrl,
+        name: user.name,
+        count: user.itineraryCount ?? Math.floor(Math.random() * 10),
+    }))
 
     return {
-        user
+        user,
+        allTrips,
+        allUsers: mappedUsers
     }
 }
 
@@ -20,6 +40,15 @@ const Dashboard = ({ loaderData }: Route.ComponentProps) => {
     const user = loaderData.user as User | null;
 
     const {totalUsers, userRole, usersJoined, totalTrips, tripsCreated} = dashboardStats;
+
+    const { allTrips, allUsers } = loaderData;
+
+    const trips = allTrips.map((trip) => ({
+        imageUrl: trip.imageUrls[0],
+        name: trip.name,
+        interest: trip.interests,
+    }))
+
     return (
         <main className="dashboard wrapper">
             <Header
@@ -59,7 +88,7 @@ const Dashboard = ({ loaderData }: Route.ComponentProps) => {
                             name={trip.name!}
                             imageUrl={trip.imageUrls[0]}
                             location={trip.itinerary?.[0]?.location ?? ''}
-                            tags={trip.tags}
+                            tags={[trip.interests!, trip.travelStyle!]}
                             price={trip.estimatedPrice!}
                         />
                     ))}

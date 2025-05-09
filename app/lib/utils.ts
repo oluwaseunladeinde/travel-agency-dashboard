@@ -16,6 +16,27 @@ export function formatNumber(num: number | string): string {
     return parsed.toLocaleString('en-US');
 }
 
+export function formatCurrency(amountString: string): string {
+    // 1. Strip the dollar sign
+    const numericString = amountString.replace('$', '');
+
+    // 2. Convert the numeric string to a number
+    const amount = parseFloat(numericString);
+
+    // 3. Check if the conversion was successful
+    if (isNaN(amount)) {
+        return 'Invalid amount';
+    }
+
+    // 4. Format the number as currency (using the user's locale by default)
+    const formattedCurrency = new Intl.NumberFormat(undefined, {
+        style: 'currency',
+        currency: 'USD', // You can change this to your desired currency code (e.g., 'NGN' for Nigerian Naira)
+    }).format(amount);
+
+    return formattedCurrency;
+}
+
 
 export function parseMarkdownToJson(markdownText: string): unknown | null {
     const regex = /```json\n([\s\S]+?)\n```/;
