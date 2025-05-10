@@ -85,3 +85,6 @@ This template comes with [Tailwind CSS](https://tailwindcss.com/) already config
 ---
 
 Built with ❤️ using React Router.
+
+## App Courtesy of JSMastery
+Link at [Travel Agency Dashboard](https://www.youtube.com/watch?v=xZ1ba-RLrjo)
